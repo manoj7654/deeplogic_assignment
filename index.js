@@ -27,21 +27,22 @@ const server = http.createServer(async (req, res) => {
           res.end('Internal Server Error');
           return;
         }
-        const stories = [];
-        console.log(html)
-        
-        let str=`<li class="latest-stories__item">
-        <a href="/6962474/heart-disease-research-women/">
-          <h3 class="latest-stories__item-headline">Why Heart Disease Research Favors Men</h3>
-        </a>
-          <div class="time-to-read">11 MIN READ</div>
-        <time class="latest-stories__item-timestamp">
-          April 5, 2024 • 11:03 AM EDT
-        </time>
-      </li>`
-       
+        const result = [];
+
+        const regex = /<li class="latest-stories__item">[\s\S]*?<a href="([^"]+)">[\s\S]*?<h3 class="latest-stories__item-headline">([^<]+)<\/h3>/g;
+
+        let match;
+        while ((match = regex.exec(html)) !== null) {
+          const link =`https://time.com` +  match[1];
+          const title = match[2].trim();
+
+          result.push({
+            title,
+            link,
+          });
+        }
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(stories));
+        res.end(JSON.stringify(result));
       });
     } catch (error) {
       console.error(`Failed to retrieve the webpage: ${error.message}`);
